@@ -11,6 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_MainWindow(object):
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
@@ -36,11 +37,8 @@ class Ui_MainWindow(object):
         # self.addFunc()
         self.BtnClick()
 
-    def addFunc(self):
-        self.label.setText("привет")
-
     def BtnClick(self):
-        self.pushButton.clicked.connect(lambda: self.addFunc())
+        self.pushButton.clicked.connect(lambda: self.label.setText("привет"))
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
