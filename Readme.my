@@ -8,3 +8,14 @@ $ sudo apt-get install qttools5-dev-tools # Qt Designer setup yes!
 
 """run designer ..."""
 
+psycopg3
+pip3 install git+https://github.com/psycopg/psycopg3.git#subdirectory=psycopg3
+
+git clone https://github.com/psycopg/psycopg3.git
+cd psycopg3
+PyCharm-----------
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ./psycopg3[dev,test]
+python3 psycopg3/setup.py build
+pip install psycopg3
