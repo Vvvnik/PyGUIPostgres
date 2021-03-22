@@ -42,7 +42,7 @@ with psycopg3.connect(
             (105, "abc'def"))
 
         # Query the database and obtain data as Python objects.
-        cur.execute("SELECT * FROM test")
+        cur.execute("SELECT * FROM test where (num<103 OR num>103)")
         #cur.fetchone()
         # will return (1, 100, "abc'def")
 
@@ -53,3 +53,4 @@ with psycopg3.connect(
 
         # Make the changes to the database persistent
         conn.commit()
+        cur.execute("DROP TABLE test")
