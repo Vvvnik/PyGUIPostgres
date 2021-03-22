@@ -25,10 +25,25 @@ with psycopg3.connect(
         cur.execute(
             "INSERT INTO test (num, data) VALUES (%s, %s)",
             (100, "abc'def"))
+        cur.execute(
+            "INSERT INTO test (num, data) VALUES (%s, %s)",
+            (101, "abc'def"))
+        cur.execute(
+            "INSERT INTO test (num, data) VALUES (%s, %s)",
+            (102, "abc'def"))
+        cur.execute(
+            "INSERT INTO test (num, data) VALUES (%s, %s)",
+            (103, "abc'def"))
+        cur.execute(
+            "INSERT INTO test (num, data) VALUES (%s, %s)",
+            (104, "abc'def"))
+        cur.execute(
+            "INSERT INTO test (num, data) VALUES (%s, %s)",
+            (105, "abc'def"))
 
         # Query the database and obtain data as Python objects.
         cur.execute("SELECT * FROM test")
-        cur.fetchone()
+        #cur.fetchone()
         # will return (1, 100, "abc'def")
 
         # You can use `cur.fetchmany()`, `cur.fetchall()` to return a list
