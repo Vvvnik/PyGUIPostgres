@@ -8,10 +8,8 @@ with psycopg3.connect(
         host="localhost",
         dbname="shop",
         port="5432") as conn:
-
     # Open a cursor to perform database operations
     with conn.cursor() as cur:
-
         # Execute a command: this creates a new table
         cur.execute("""
             CREATE TABLE test (
@@ -24,27 +22,27 @@ with psycopg3.connect(
         # the correct conversion (no SQL injections!)
         cur.execute(
             "INSERT INTO test (num, data) VALUES (%s, %s)",
-            (100, "abc'def"))
+            (100, "abide"))
         cur.execute(
             "INSERT INTO test (num, data) VALUES (%s, %s)",
-            (101, "abc'def"))
+            (101, "abide"))
         cur.execute(
             "INSERT INTO test (num, data) VALUES (%s, %s)",
-            (102, "abc'def"))
+            (102, "abide"))
         cur.execute(
             "INSERT INTO test (num, data) VALUES (%s, %s)",
-            (103, "abc'def"))
+            (103, "abide"))
         cur.execute(
             "INSERT INTO test (num, data) VALUES (%s, %s)",
-            (104, "abc'def"))
+            (104, "abide"))
         cur.execute(
             "INSERT INTO test (num, data) VALUES (%s, %s)",
-            (105, "abc'def"))
+            (105, "abide"))
 
         # Query the database and obtain data as Python objects.
         cur.execute("SELECT * FROM test where (num<103 OR num>103)")
-        #cur.fetchone()
-        # will return (1, 100, "abc'def")
+        # cur.fetchone()
+        # will return (1, 100, "abide")
 
         # You can use `cur.fetchmany()`, `cur.fetchall()` to return a list
         # of several records, or even iterate on the cursor
