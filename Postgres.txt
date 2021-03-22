@@ -1,0 +1,551 @@
+﻿postgres@WS-7104:~$ psql -h localhost -U two -d my
+Пароль пользователя two: 
+
+my=# create database shop
+my-# ;
+CREATE DATABASE
+my=# \c shop
+SSL-соединение (протокол: TLSv1.3, шифр: TLS_AES_256_GCM_SHA384, бит: 256, сжатие: выкл.)
+Вы подключены к базе данных "shop" как пользователь "two".
+
+shop=# create table customer(
+shop(# id serial primary key,
+shop(# name varchar(255),
+shop(# phone varchar(30),
+shop(# email varchar(255)
+shop(# );
+CREATE TABLE
+shop=# \d
+                     Список отношений
+ Схема  |       Имя       |        Тип         | Владелец 
+--------+-----------------+--------------------+----------
+ public | customer        | таблица            | two
+ public | customer_id_seq | последовательность | two
+(2 строки)
+
+shop=# \d customer
+                                           Таблица "public.customer"
+ Столбец |          Тип           | Правило сортировки | Допустимость NULL |             По умолчанию             
+---------+------------------------+--------------------+-------------------+--------------------------------------
+ id      | integer                |                    | not null          | nextval('customer_id_seq'::regclass)
+ name    | character varying(255) |                    |                   | 
+ phone   | character varying(30)  |                    |                   | 
+ email   | character varying(255) |                    |                   | 
+Индексы:
+    "customer_pkey" PRIMARY KEY, btree (id)
+
+shop=# create table product(
+shop(# id serial primary key,
+shop(# name varchar(255),
+shop(# description text,
+shop(# price integer);
+CREATE TABLE
+shop=# \d
+                     Список отношений
+ Схема  |       Имя       |        Тип         | Владелец 
+--------+-----------------+--------------------+----------
+ public | customer        | таблица            | two
+ public | customer_id_seq | последовательность | two
+ public | product         | таблица            | two
+ public | product_id_seq  | последовательность | two
+(4 строки)
+
+
+shop=# \d product
+                                             Таблица "public.product"
+   Столбец   |          Тип           | Правило сортировки | Допустимость NULL |            По умолчанию             
+-------------+------------------------+--------------------+-------------------+-------------------------------------
+ id          | integer                |                    | not null          | nextval('product_id_seq'::regclass)
+ name        | character varying(255) |                    |                   | 
+ description | text                   |                    |                   | 
+ price       | integer                |                    |                   | 
+Индексы:
+    "product_pkey" PRIMARY KEY, btree (id)
+    
+shop=# \d product
+shop=# create table product_photo(
+shop(# id serial primary key,
+shop(# url varchar(255),
+shop(# product_id integer references product(id));
+CREATE TABLE
+
+shop=# \d
+                       Список отношений
+ Схема  |         Имя          |        Тип         | Владелец 
+--------+----------------------+--------------------+----------
+ public | customer             | таблица            | two
+ public | customer_id_seq      | последовательность | two
+ public | product              | таблица            | two
+ public | product_id_seq       | последовательность | two
+ public | product_photo        | таблица            | two
+ public | product_photo_id_seq | последовательность | two
+(6 строк)
+
+shop=# \d product_photo
+                                             Таблица "public.product_photo"
+  Столбец   |          Тип           | Правило сортировки | Допустимость NULL |               По умолчанию                
+------------+------------------------+--------------------+-------------------+-------------------------------------------
+ id         | integer                |                    | not null          | nextval('product_photo_id_seq'::regclass)
+ url        | character varying(255) |                    |                   | 
+ product_id | integer                |                    |                   | 
+Индексы:
+    "product_photo_pkey" PRIMARY KEY, btree (id)
+Ограничения внешнего ключа:
+    "product_photo_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+shop=# create table cart(
+shop(# customer_id integer references customer(id),
+shop(# id serial primary key);
+CREATE TABLE
+
+shop=# \d
+                       Список отношений
+ Схема  |         Имя          |        Тип         | Владелец 
+--------+----------------------+--------------------+----------
+ public | cart                 | таблица            | two
+ public | cart_id_seq          | последовательность | two
+ public | customer             | таблица            | two
+ public | customer_id_seq      | последовательность | two
+ public | product              | таблица            | two
+ public | product_id_seq       | последовательность | two
+ public | product_photo        | таблица            | two
+ public | product_photo_id_seq | последовательность | two
+(8 строк)
+
+shop=# \d cart
+                                       Таблица "public.cart"
+   Столбец   |   Тип   | Правило сортировки | Допустимость NULL |           По умолчанию           
+-------------+---------+--------------------+-------------------+----------------------------------
+ customer_id | integer |                    |                   | 
+ id          | integer |                    | not null          | nextval('cart_id_seq'::regclass)
+Индексы:
+    "cart_pkey" PRIMARY KEY, btree (id)
+Ограничения внешнего ключа:
+    "cart_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES customer(id)
+
+shop=# create table cart_product(
+cart_id integer references cart(id),
+product_id integer references product(id));
+CREATE TABLE
+shop=# \d
+                       Список отношений
+ Схема  |         Имя          |        Тип         | Владелец 
+--------+----------------------+--------------------+----------
+ public | cart                 | таблица            | two
+ public | cart_id_seq          | последовательность | two
+ public | cart_product         | таблица            | two
+ public | customer             | таблица            | two
+ public | customer_id_seq      | последовательность | two
+ public | product              | таблица            | two
+ public | product_id_seq       | последовательность | two
+ public | product_photo        | таблица            | two
+ public | product_photo_id_seq | последовательность | two
+(9 строк)
+
+shop=# \d cart_product
+                        Таблица "public.cart_product"
+  Столбец   |   Тип   | Правило сортировки | Допустимость NULL | По умолчанию 
+------------+---------+--------------------+-------------------+--------------
+ cart_id    | integer |                    |                   | 
+ product_id | integer |                    |                   | 
+Ограничения внешнего ключа:
+    "cart_product_cart_id_fkey" FOREIGN KEY (cart_id) REFERENCES cart(id)
+    "cart_product_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+shop=# \d customer
+shop=# insert into product(name, description, price) values ('iphone', 'крутой телефон', 100000);
+INSERT 0 1
+shop=# insert into product(name, description, price) values ('Apple watch', 'крутые часы', 50000);
+INSERT 0 1
+shop=# select * from product;
+ id |    name     |  description   | price  
+----+-------------+----------------+--------
+  1 | iphone      | крутой телефон | 100000
+  2 | Apple watch | крутые часы    |  50000
+(2 строки)
+
+shop=# \d product_photo
+shop=# \d product_photo 
+shop=# insert into product_photo(url, product_id) values ('iphone_photo', 1);
+INSERT 0 1
+shop=# insert into product_photo(url, product_id) values ('iphone_photo', 1);^C
+
+shop=# select * from product_photo pp;
+ id |     url      | product_id 
+----+--------------+------------
+  1 | iphone_photo |          1
+(1 строка)
+
+shop=# select pp.* from product_photo pp;
+ id |     url      | product_id 
+----+--------------+------------
+  1 | iphone_photo |          1
+(1 строка)
+    
+shop=# select pp.* from product_photo pp left join product p on p.id=pp.product_id;
+ id |     url      | product_id 
+----+--------------+------------
+  1 | iphone_photo |          1
+(1 строка)
+
+shop=# select pp.*, p.name from product_photo pp left join product p on p.id=pp.product_id;
+ id |     url      | product_id |  name  
+----+--------------+------------+--------
+  1 | iphone_photo |          1 | iphone
+(1 строка)
+
+shop=# \d product_photo
+                                             Таблица "public.product_photo"
+  Столбец   |          Тип           | Правило сортировки | Допустимость NULL |               По умолчанию                
+------------+------------------------+--------------------+-------------------+-------------------------------------------
+ id         | integer                |                    | not null          | nextval('product_photo_id_seq'::regclass)
+ url        | character varying(255) |                    |                   | 
+ product_id | integer                |                    |                   | 
+Индексы:
+    "product_photo_pkey" PRIMARY KEY, btree (id)
+Ограничения внешнего ключа:
+    "product_photo_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+
+shop=# alter table product_photo drop constraint product_photo_product_id_fkey;
+ALTER TABLE
+shop=# \d product_photo
+                                              Таблица "public.product_photo"
+  Столбец   |          Тип           | Правило сортировки | Допустимость NULL |               По умолчанию                
+------------+------------------------+--------------------+-------------------+-------------------------------------------
+ id         | integer                |                    | not null          | nextval('product_photo_id_seq'::regclass)
+ url        | character varying(255) |                    |                   | 
+ product_id | integer                |                    |                   | 
+Индексы:
+    "product_photo_pkey" PRIMARY KEY, btree (id)
+
+shop=# insert into product_photo (url, product_id) values ('unknoun_photo', 100);
+INSERT 0 1
+shop=# select * from product_photo pp;
+ id |      url      | product_id 
+----+---------------+------------
+  1 | iphone_photo  |          1
+  2 | unknoun_photo |        100
+(2 строки)
+
+shop=# select pp.*, p.name from product_photo pp left join product p on p.id=pp.product_id;
+ id |      url      | product_id |  name  
+----+---------------+------------+--------
+  1 | iphone_photo  |          1 | iphone
+  2 | unknoun_photo |        100 | 
+(2 строки)
+
+shop=# select pp.*, p.name from product_photo pp right join product p on p.id=pp.product_id;
+ id |     url      | product_id |    name     
+----+--------------+------------+-------------
+  1 | iphone_photo |          1 | iphone
+    |              |            | Apple watch
+(2 строки)
+
+shop=# select pp.*, p.name from product_photo pp inner join product p on p.id=pp.product_id;
+ id |     url      | product_id |  name  
+----+--------------+------------+--------
+  1 | iphone_photo |          1 | iphone
+(1 строка)
+
+shop=# delete from product_photo where id=2;
+DELETE 1
+
+shop=# select * from product_photo pp;
+ id |     url      | product_id 
+----+--------------+------------
+  1 | iphone_photo |          1
+(1 строка)
+
+shop=# update product_photo set url='iphone_image_2' where id=1;
+UPDATE 1
+shop=# select * from product_photo pp;
+ id |      url       | product_id 
+----+----------------+------------
+  1 | iphone_image_2 |          1
+(1 строка)
+
+shop-# \d cart
+                                       Таблица "public.cart"
+   Столбец   |   Тип   | Правило сортировки | Допустимость NULL |           По умолчанию           
+-------------+---------+--------------------+-------------------+----------------------------------
+ customer_id | integer |                    |                   | 
+ id          | integer |                    | not null          | nextval('cart_id_seq'::regclass)
+Индексы:
+    "cart_pkey" PRIMARY KEY, btree (id)
+Ограничения внешнего ключа:
+    "cart_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES customer(id)
+Ссылки извне:
+    TABLE "cart_product" CONSTRAINT "cart_product_cart_id_fkey" FOREIGN KEY (cart_id) REFERENCES cart(id)
+
+shop=# select * from cart;
+ customer_id | id 
+-------------+----
+(0 строк)
+
+
+shop=# select * from cart;
+ customer_id | id 
+-------------+----
+           2 | 11
+(1 строка)
+
+shop=# alter sequence cart_id_seq restart;
+ALTER SEQUENCE
+shop=# insert into cart (customer_id) values (2);   
+INSERT 0 1
+shop=# select * from cart;
+ customer_id | id 
+-------------+----
+           2 | 11
+           2 |  1
+(2 строки)
+
+shop=# select * from customer
+shop-# ;
+ id | name | phone |   email   
+----+------+-------+-----------
+  1 | Петр | 2     | vvv@gmail
+  2 | Jon  | 32    | nik@gmail
+(2 строки)
+
+shop=# select c.name from customer c;
+ name 
+------
+ Петр
+ Jon
+(2 строки)
+
+shop=# select c.name from customer c left join cart on cart.customer_id=c.id; 
+ name 
+------
+ Jon
+ Jon
+ Петр
+(3 строки)
+
+shop=# select c.name,cart.id from customer c left join cart on cart.customer_id=c.id; 
+ name | id 
+------+----
+ Jon  | 11
+ Jon  |  1
+ Петр |   
+(3 строки)
+
+shop=# select * from cart_product;
+ cart_id | product_id 
+---------+------------
+      11 |          1
+      11 |          2
+(2 строки)
+
+shop=# delete from cart_product where cart_id=11;
+DELETE 2
+shop=# delete from cart where id=11;
+DELETE 1
+shop=# select c.name,cart.id from customer c left join cart on cart.customer_id=c.id; 
+ name | id 
+------+----
+ Jon  |  1
+ Петр |   
+(2 строки)
+
+shop=# select c.name,cart.id as cart_id from customer c left join cart on cart.customer_id=c.id; 
+ name | cart_id 
+------+---------
+ Jon  |       1
+ Петр |        
+(2 строки)
+
+shop=# select c.name,cart.id as cart_id from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id; 
+ name | cart_id 
+------+---------
+ Jon  |       1
+ Петр |        
+(2 строки)
+
+shop=# select * from cart_product;
+ cart_id | product_id 
+---------+------------
+(0 строк)
+
+shop=# select * from cart_product;
+ cart_id | product_id 
+---------+------------
+(0 строк)
+
+shop=# insert into cart_product (cart_id, product_id) values (11, 1), (11, 2);
+ОШИБКА:  INSERT или UPDATE в таблице "cart_product" нарушает ограничение внешнего ключа "cart_product_cart_id_fkey"
+ПОДРОБНОСТИ:  Ключ (cart_id)=(11) отсутствует в таблице "cart".
+shop=# select * from cart;
+ customer_id | id 
+-------------+----
+           2 |  1
+(1 строка)
+
+shop=# insert into cart_product (cart_id, product_id) values (1, 1), (1, 2);
+INSERT 0 2
+shop=# select * from cart;
+ customer_id | id 
+-------------+----
+           2 |  1
+(1 строка)
+
+shop=# select * from cart_product;
+ cart_id | product_id 
+---------+------------
+       1 |          1
+       1 |          2
+(2 строки)
+
+shop=# select c.name,cart.id as cart_id from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id; 
+ name | cart_id 
+------+---------
+ Jon  |       1
+ Jon  |       1
+ Петр |        
+(3 строки)
+
+shop=# select c.name,cart.id as cart_id, cp.product_id from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id; 
+ name | cart_id | product_id 
+------+---------+------------
+ Jon  |       1 |          1
+ Jon  |       1 |          2
+ Петр |         |           
+(3 строки)
+
+shop=# select c.name,cart.id as cart_id, cp.product_id, product.name from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id; 
+ОШИБКА:  таблица "product" отсутствует в предложении FROM
+СТРОКА 1: select c.name,cart.id as cart_id, cp.product_id, product.nam...
+                                                           ^
+shop=# select c.name,cart.id as cart_id, cp.product_id, p.price from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id left join product p on p.id=cp.product_id; 
+ name | cart_id | product_id | price  
+------+---------+------------+--------
+ Jon  |       1 |          1 | 100000
+ Jon  |       1 |          2 |  50000
+ Петр |         |            |       
+(3 строки)
+
+shop=# select c.name,cart.id as cart_id, cp.product_id, p.name, p.price from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id left join product p on p.id=cp.product_id; 
+ name | cart_id | product_id |    name     | price  
+------+---------+------------+-------------+--------
+ Jon  |       1 |          1 | iphone      | 100000
+ Jon  |       1 |          2 | Apple watch |  50000
+ Петр |         |            |             |       
+(3 строки)
+
+shop=# select c.name, p.name, p.price from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id left join product p on p.id=cp.product_id;
+ name |    name     | price  
+------+-------------+--------
+ Jon  | iphone      | 100000
+ Jon  | Apple watch |  50000
+ Петр |             |       
+(3 строки)
+
+shop=# select c.name, sum(p.price) from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id left join product p on p.id=cp.product_id group by c.name;
+ name |  sum   
+------+--------
+ Петр |       
+ Jon  | 150000
+(2 строки)
+
+shop=# select * from product;
+ id |    name     |  description   | price  
+----+-------------+----------------+--------
+  1 | iphone      | крутой телефон | 100000
+  2 | Apple watch | крутые часы    |  50000
+(2 строки)
+
+shop=# select c.name, coalesce(sum(p.price),0) as orders_sum from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id left join product p on p.id=cp.product_id group by c.name;
+ name | orders_sum 
+------+------------
+ Петр |          0
+ Jon  |     150000
+(2 строки)
+
+Чтобы все клиенты отсортировались кто больше потратил :
+
+shop=# select c.name, coalesce(sum(p.price),0) as orders_sum from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id left join product p on p.id=cp.product_id group by c.name order by orders_sum;
+ name | orders_sum 
+------+------------
+ Петр |          0
+ Jon  |     150000
+(2 строки)
+
+shop=# select c.name, coalesce(sum(p.price),0) as orders_sum from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id left join product p on p.id=cp.product_id group by c.name order by orders_sum desc;
+ name | orders_sum 
+------+------------
+ Jon  |     150000
+ Петр |          0
+(2 строки)
+
+Теперь те кто что то купил:
+
+shop=# select c.name, coalesce(sum(p.price),0) as orders_sum from customer c left join cart on cart.customer_id=c.id left join cart_product cp on cp.cart_id=cart.id left join product p on p.id=cp.product_id group by c.name having sum(p.price)>0;
+ name | orders_sum 
+------+------------
+ Jon  |     150000
+(1 строка)
+
+Здесь having фильтрует группой, а where фильтрует строками!!!!
+
+Далее.....
+
+shop=# select * from customer;
+ id | name | phone |   email   
+----+------+-------+-----------
+  1 | Петр | 2     | vvv@gmail
+  2 | Jon  | 32    | nik@gmail
+(2 строки)
+
+shop=# select * from customer order by name;
+ id | name | phone |   email   
+----+------+-------+-----------
+  2 | Jon  | 32    | nik@gmail
+  1 | Петр | 2     | vvv@gmail
+(2 строки)
+
+shop=# select * from customer order by name ~<~;
+ОШИБКА:  оператор не существует: character varying ~<~
+СТРОКА 1: select * from customer order by name ~<~;
+
+shop=# UPDATE customer SET name='Джон' where id=2;
+UPDATE 1
+shop=# select * from customer order by name;
+ id | name | phone |   email   
+----+------+-------+-----------
+  2 | Джон | 32    | nik@gmail
+  1 | Петр | 2     | vvv@gmail
+(2 строки)
+
+shop=# select * from customer order by name limit 1;
+ id | name | phone |   email   
+----+------+-------+-----------
+  2 | Джон | 32    | nik@gmail
+(1 строка)
+
+shop=# select * from customer order by name limit 2;
+ id | name | phone |   email   
+----+------+-------+-----------
+  2 | Джон | 32    | nik@gmail
+  1 | Петр | 2     | vvv@gmail
+(2 строки)
+
+shop=# select * from customer order by name limit 3;
+ id | name | phone |   email   
+----+------+-------+-----------
+  2 | Джон | 32    | nik@gmail
+  1 | Петр | 2     | vvv@gmail
+(2 строки)
+
+shop=# select * from customer order by name limit 1 offset 1;
+ id | name | phone |   email   
+----+------+-------+-----------
+  1 | Петр | 2     | vvv@gmail
+(1 строка)
+
+
+
+
+
+

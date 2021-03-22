@@ -1,28 +1,40 @@
 # Connect into DB on the PC Саша
+import psycopg3
 
-import psycopg2
+# Connect to an existing database
+with psycopg3.connect(
+        user="two",
+        password="123",
+        host="localhost",
+        dbname="shop",
+        port="5432") as conn:
 
-con = psycopg2.connect(
-  database="vvvnik",
-  user="postgreadmin",
-  password="123",
-  host="localhost",
-  port="5432"
-)
-print("Database opened successfully")
-cur = con.cursor()
-cur.execute('''CREATE TABLE STUDENT
-     (ADMISSION INT PRIMARY KEY NOT NULL,
-     NAME TEXT NOT NULL,
-     AGE INT NOT NULL,
-     COURSE CHAR(50),
-     DEPARTMENT CHAR(50));''')
+    # Open a cursor to perform database operations
+    with conn.cursor() as cur:
 
-cur.execute(
-  "INSERT INTO STUDENT (ADMISSION,NAME,AGE,COURSE,DEPARTMENT) VALUES (3423, 'John', 18, 'Computer Science', 'ICT')"
-)
+        # Execute a command: this creates a new table
+        cur.execute("""
+            CREATE TABLE test (
+                id serial PRIMARY KEY,
+                num integer,
+                data text)
+            """)
 
-print("Record inserted successfully")
+        # Pass data to fill a query placeholders and let Psycopg perform
+        # the correct conversion (no SQL injections!)
+        cur.execute(
+            "INSERT INTO test (num, data) VALUES (%s, %s)",
+            (100, "abc'def"))
 
-con.commit()
-con.close()
+        # Query the database and obtain data as Python objects.
+        cur.execute("SELECT * FROM test")
+        cur.fetchone()
+        # will return (1, 100, "abc'def")
+
+        # You can use `cur.fetchmany()`, `cur.fetchall()` to return a list
+        # of several records, or even iterate on the cursor
+        for record in cur:
+            print(record)
+
+        # Make the changes to the database persistent
+        conn.commit()
